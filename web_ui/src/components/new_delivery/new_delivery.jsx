@@ -30,9 +30,14 @@ const NewDelivery = () => {
     };
 
     const handleSubmit = () => {
-        const data = submitAllData();
-        console.log('Submitting form data:', data);
-        navigate('/');
+        try {
+       
+            const result = submitAllData();
+            console.log('Form data:', result);
+            navigate('/');
+        } catch (error) {
+            console.error('Error in handleSubmit:', error);
+        }
     };
 
     const getStepContent = (step) => {

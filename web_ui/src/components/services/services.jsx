@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Container,
     Typography,
@@ -8,8 +8,6 @@ import {
     Card,
     CardContent,
     CardActionArea,
-    Button,
-    Checkbox,
     FormControl,
     FormLabel,
     Chip,
@@ -21,6 +19,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import WarningIcon from '@mui/icons-material/Warning';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
+import { useApplication } from '../../context/ApplicationContext';
 
 const serviceTypes = [
     {
@@ -67,8 +66,15 @@ const serviceTypes = [
     },
 ];
 
-const Services = ({ onSubmit, initialValue = [] }) => {
-    const [selectedServices, setSelectedServices] = useState(initialValue);
+const Services = () => {
+    const { applicationData, updateFormData } = useApplication();
+    const [selectedServices, setSelectedServices] = useState(applicationData.servicesData.services || []);
+
+    useEffect(() => {
+        updateFormData('servicesData', {
+            services: selectedServices
+        });
+    }, [selectedServices]);
 
     const handleServiceToggle = (serviceId) => {
         setSelectedServices(prev => {
@@ -78,12 +84,6 @@ const Services = ({ onSubmit, initialValue = [] }) => {
                 return [...prev, serviceId];
             }
         });
-    };
-
-    const handleSubmit = () => {
-        if (onSubmit) {
-            onSubmit(selectedServices);
-        }
     };
 
     return (
@@ -156,13 +156,11 @@ const Services = ({ onSubmit, initialValue = [] }) => {
                                 <Card 
                                     sx={{ 
                                         height: '100%',
-                                        border: selectedServices.includes(service.id) 
-                                            ? '2px solid #1a237e' 
-                                            : '1px solid #e0e0e0',
-                                        transition: 'all 0.2s',
+                                        border: selectedServices.includes(service.id) ? '2px solid #1a237e' : 'none',
+                                        transition: 'all 0.3s ease',
                                         '&:hover': {
                                             transform: 'translateY(-4px)',
-                                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+                                            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)',
                                         },
                                     }}
                                 >
@@ -170,58 +168,14 @@ const Services = ({ onSubmit, initialValue = [] }) => {
                                         onClick={() => handleServiceToggle(service.id)}
                                         sx={{ height: '100%' }}
                                     >
-                                        <CardContent sx={{ p: 2 }}>
-                                            <Box 
-                                                sx={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'flex-start',
-                                                    mb: 1.5,
-                                                }}
-                                            >
-                                                <Checkbox 
-                                                    checked={selectedServices.includes(service.id)}
-                                                    sx={{ 
-                                                        mr: 1,
-                                                        mt: 0.5,
-                                                    }}
-                                                />
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'center',
-                                                    color: '#1a237e',
-                                                    flex: 1,
-                                                }}>
-                                                    <Box sx={{ 
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        width: 40,
-                                                        height: 40,
-                                                        mr: 1.5,
-                                                    }}>
-                                                        {service.icon}
-                                                    </Box>
-                                                    <Typography 
-                                                        variant="h6" 
-                                                        sx={{ 
-                                                            fontWeight: 600,
-                                                            fontSize: '1.1rem',
-                                                            lineHeight: 1.2,
-                                                        }}
-                                                    >
-                                                        {service.name}
-                                                    </Typography>
-                                                </Box>
+                                        <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                                            <Box sx={{ mb: 2, color: selectedServices.includes(service.id) ? '#1a237e' : 'inherit' }}>
+                                                {service.icon}
                                             </Box>
-                                            <Typography 
-                                                variant="body2" 
-                                                color="text.secondary"
-                                                sx={{ 
-                                                    pl: 6,
-                                                    fontSize: '0.9rem',
-                                                    lineHeight: 1.4,
-                                                }}
-                                            >
+                                            <Typography variant="h6" gutterBottom>
+                                                {service.name}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
                                                 {service.description}
                                             </Typography>
                                         </CardContent>
@@ -231,34 +185,6 @@ const Services = ({ onSubmit, initialValue = [] }) => {
                         ))}
                     </Grid>
                 </FormControl>
-
-                <Box 
-                    sx={{ 
-                        mt: 5,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: 2,
-                    }}
-                >
-                    <Button
-                        variant="contained"
-                        size="large"
-                        onClick={handleSubmit}
-                        disabled={selectedServices.length === 0}
-                        startIcon={<LocalShippingIcon />}
-                        sx={{
-                            backgroundColor: '#1a237e',
-                            '&:hover': {
-                                backgroundColor: '#283593',
-                            },
-                            px: 4,
-                            py: 1.5,
-                            minWidth: 200,
-                        }}
-                    >
-                        Применить
-                    </Button>
-                </Box>
             </Paper>
         </Container>
     );

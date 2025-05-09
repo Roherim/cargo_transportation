@@ -46,7 +46,7 @@ const Model = () => {
                 </TextField>
             </FormControl>
 
-            <FormControl fullWidth sx={{ mb: 3 }}>
+            <FormControl fullWidth>
                 <FormLabel>Номер</FormLabel>
                 <TextField
                     value={number}

@@ -53,15 +53,8 @@ export const ApplicationProvider = ({ children }) => {
             technicalCondition: 'Исправно'
         };
 
-        // Выводим в консоль все собранные данные только при сабмите
-        console.log('Application data on submit:', allData);
-
-        // Здесь можно добавить отправку данных на сервер
-        // try {
-        //     await api.createDelivery(allData);
-        // } catch (error) {
-        //     console.error('Error submitting data:', error);
-        // }
+        // Выводим в консоль все данные одним JSON-объектом
+        
 
         return allData;
     };
