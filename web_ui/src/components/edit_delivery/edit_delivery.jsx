@@ -62,8 +62,14 @@ const EditDelivery = () => {
     };
 
     const handleSubmit = () => {
-        submitAllData();
-        navigate('/'); // Возврат к списку доставок после сохранения
+        try {
+            console.log('Edit delivery button clicked');
+            const result = submitAllData();
+            console.log('Edited delivery data:', result);
+            navigate('/');
+        } catch (error) {
+            console.error('Error in handleSubmit:', error);
+        }
     };
 
     const handleDelete = () => {
