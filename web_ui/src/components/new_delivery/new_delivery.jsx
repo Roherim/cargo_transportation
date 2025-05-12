@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Box, Stepper, Step, StepLabel, Button, Typography } from '@mui/material';
+import { Box, Stepper, Step, StepLabel, Button, Typography, Alert, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Model from '../model/model';
 import DateTime from '../datetime/datetime';
 import AddressMap from '../address_map/address_map';
 import Packaging from '../packaging/packaging';
+import CargoType from '../cargo_type/cargo_type';
 import Services from '../services/services';
 import { useApplication } from '../../context/ApplicationContext';
 
@@ -13,13 +14,14 @@ const steps = [
     'Дата и время',
     'Адреса и координаты',
     'Упаковка',
+    'Тип груза',
     'Услуги'
 ];
 
 const NewDelivery = () => {
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(0);
-    const { submitAllData } = useApplication();
+    const { handleSubmit, loading, error } = useApplication();
 
     const handleNext = () => {
         setActiveStep((prevStep) => prevStep + 1);
@@ -27,17 +29,6 @@ const NewDelivery = () => {
 
     const handleBack = () => {
         setActiveStep((prevStep) => prevStep - 1);
-    };
-
-    const handleSubmit = () => {
-        try {
-       
-            const result = submitAllData();
-            console.log('Form data:', result);
-            navigate('/');
-        } catch (error) {
-            console.error('Error in handleSubmit:', error);
-        }
     };
 
     const getStepContent = (step) => {
@@ -51,6 +42,8 @@ const NewDelivery = () => {
             case 3:
                 return <Packaging />;
             case 4:
+                return <CargoType />;
+            case 5:
                 return <Services />;
             default:
                 return 'Неизвестный шаг';
@@ -71,7 +64,13 @@ const NewDelivery = () => {
                 ))}
             </Stepper>
 
-            <Box sx={{ mt: 4 }}>
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
+
+            <Box sx={{ mt: 2, mb: 4 }}>
                 {getStepContent(activeStep)}
             </Box>
 
@@ -79,6 +78,8 @@ const NewDelivery = () => {
                 <Button
                     disabled={activeStep === 0}
                     onClick={handleBack}
+                    variant="outlined"
+                    sx={{ mr: 1 }}
                 >
                     Назад
                 </Button>
@@ -86,13 +87,16 @@ const NewDelivery = () => {
                     {activeStep === steps.length - 1 ? (
                         <Button
                             variant="contained"
+                            color="primary"
                             onClick={handleSubmit}
+                            disabled={loading}
                         >
-                            Создать доставку
+                            {loading ? <CircularProgress size={24} /> : 'Создать доставку'}
                         </Button>
                     ) : (
                         <Button
                             variant="contained"
+                            color="primary"
                             onClick={handleNext}
                         >
                             Далее

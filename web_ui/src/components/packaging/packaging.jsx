@@ -4,112 +4,110 @@ import {
     Typography,
     Box,
     Paper,
-    Grid,
-    Card,
-    CardContent,
-    CardActionArea,
-    Button,
-    Radio,
-    RadioGroup,
-    FormControlLabel,
     FormControl,
     FormLabel,
     TextField,
     MenuItem,
+    CircularProgress,
+    Alert
 } from '@mui/material';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import CategoryIcon from '@mui/icons-material/Category';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import StorageIcon from '@mui/icons-material/Storage';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import BlockIcon from '@mui/icons-material/Block';
 import { useApplication } from '../../context/ApplicationContext';
-
-const PACKAGING_TYPES = [
-    'Коробка',
-    'Палета',
-    'Контейнер',
-    'Без упаковки'
-];
+import { api } from '../../services/api';
 
 const Packaging = () => {
     const { applicationData, updateFormData } = useApplication();
-    const [packaging, setPackaging] = useState(applicationData.packagingData.packaging || '');
+    const [packaging, setPackaging] = useState('');
+    const [packagingTypes, setPackagingTypes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
+        const fetchPackagingTypes = async () => {
+            try {
+                const data = await api.getOptions();
+                if (data?.packaging_types) {
+                    setPackagingTypes(data.packaging_types);
+                    if (applicationData.packagingData?.packaging) {
+                        setPackaging(applicationData.packagingData.packaging);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching packaging types:', error);
+                setError('Ошибка при загрузке типов упаковки');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPackagingTypes();
+    }, []);
+
+    const handlePackagingChange = (e) => {
+        const newValue = e.target.value;
+        setPackaging(newValue);
         updateFormData('packagingData', {
-            packaging
+            packaging: newValue
         });
-    }, [packaging]);
+    };
+
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <Alert severity="error">{error}</Alert>
+            </Box>
+        );
+    }
+
+    if (!packagingTypes.length) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <Alert severity="warning">Нет доступных типов упаковки</Alert>
+            </Box>
+        );
+    }
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Paper 
-                elevation={3} 
+            <Typography 
+                variant="h4" 
+                gutterBottom 
                 sx={{ 
-                    p: { xs: 2, md: 4 },
-                    borderRadius: '12px',
-                    backgroundColor: '#ffffff',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    mb: 4, 
+                    fontWeight: 600,
+                    color: '#1a237e',
+                    fontSize: { xs: '1.5rem', md: '2rem' },
+                    textAlign: 'center',
                 }}
             >
-                <Typography 
-                    variant="h4" 
-                    gutterBottom 
-                    sx={{ 
-                        mb: 4, 
-                        fontWeight: 600,
-                        color: '#1a237e',
-                        fontSize: { xs: '1.5rem', md: '2rem' },
-                        textAlign: 'center',
-                    }}
-                >
-                    Выбор упаковки
-                </Typography>
+                Выбор типа упаковки
+            </Typography>
 
-                <FormControl fullWidth sx={{ mb: 3 }}>
+            <Box sx={{ maxWidth: 600, mx: 'auto', p: 3 }}>
+                <FormControl fullWidth>
                     <FormLabel>Тип упаковки</FormLabel>
                     <TextField
                         select
                         value={packaging}
-                        onChange={(e) => setPackaging(e.target.value)}
+                        onChange={handlePackagingChange}
                         fullWidth
+                        error={!packaging}
+                        helperText={!packaging ? "Выберите тип упаковки" : ""}
                     >
-                        {PACKAGING_TYPES.map((type) => (
-                            <MenuItem key={type} value={type}>
-                                {type}
+                        {packagingTypes.map((type) => (
+                            <MenuItem key={type.id} value={type.id}>
+                                {type.name}
                             </MenuItem>
                         ))}
                     </TextField>
                 </FormControl>
-
-                <Box 
-                    sx={{ 
-                        mt: 5,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: 2,
-                    }}
-                >
-                    <Button
-                        variant="contained"
-                        size="large"
-                        startIcon={<LocalShippingIcon />}
-                        sx={{
-                            backgroundColor: '#1a237e',
-                            '&:hover': {
-                                backgroundColor: '#283593',
-                            },
-                            px: 4,
-                            py: 1.5,
-                            minWidth: 200,
-                        }}
-                    >
-                        Применить
-                    </Button>
-                </Box>
-            </Paper>
+            </Box>
         </Container>
     );
 };

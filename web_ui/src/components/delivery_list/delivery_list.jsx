@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Container,
     Typography,
@@ -17,54 +17,111 @@ import {
     InputLabel,
     Select,
     MenuItem,
+    CircularProgress,
+    Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { api } from '../../services/api';
 
 const DeliveryList = () => {
     const navigate = useNavigate();
     const [showFilters, setShowFilters] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [deliveries, setDeliveries] = useState([]);
+    const [filterOptions, setFilterOptions] = useState({
+        statuses: [],
+        cargoTypes: [],
+        transportModels: []
+    });
     const [filters, setFilters] = useState({
         timeRange: [0, 24],
         distanceRange: [0, 1000],
+        status: '',
+        cargoType: '',
+        transportModel: '',
+        search: ''
     });
 
-    // Временные данные для примера
-    const deliveries = [
-        {
-            id: 1,
-            number: 'DEL-001',
-            distance: 150,
-            time: 3,
-            service: 'Погрузка',
-            packaging: 'Картонная коробка',
-            status: 'Проведено',
-            technicalCondition: 'Исправно',
-        },
-        {
-            id: 2,
-            number: 'DEL-002',
-            distance: 300,
-            time: 5,
-            service: 'Разгрузка',
-            packaging: 'Паллета',
-            status: 'В ожидании',
-            technicalCondition: 'Исправно',
-        },
-        // Добавьте больше тестовых данных по необходимости
-    ];
+    // Загрузка опций для фильтров
+    useEffect(() => {
+        const fetchFilterOptions = async () => {
+            try {
+                const [statuses, cargoTypes, transportModels] = await Promise.all([
+                    api.getDeliveryStatuses(),
+                    api.getCargoTypes(),
+                    api.getTransportModels()
+                ]);
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Проведено':
-                return '#2e7d32';
-            case 'В ожидании':
-                return '#ed6c02';
-            default:
-                return '#666666';
-        }
-    };
+                setFilterOptions({
+                    statuses,
+                    cargoTypes,
+                    transportModels
+                });
+            } catch (error) {
+                console.error('Error fetching filter options:', error);
+                setError(error.message);
+            }
+        };
+
+        fetchFilterOptions();
+    }, []);
+
+    // Загрузка доставок с фильтрами
+    useEffect(() => {
+        console.log('Инициирован запрос на получение доставок');
+        console.log('Текущие фильтры:', JSON.stringify(filters));
+        const fetchDeliveries = async () => {
+            try {
+                setLoading(true);
+                console.log('Начало загрузки данных');
+                const queryParams = {};
+                
+                if (filters.status) {
+                    queryParams.status = filters.status;
+                }
+                if (filters.cargoType) {
+                    queryParams.cargo_type = filters.cargoType;
+                }
+                if (filters.transportModel) {
+                    queryParams.transport_model = filters.transportModel;
+                }
+                if (filters.search) {
+                    queryParams.search = filters.search;
+                }
+                if (filters.timeRange[0] > 0 || filters.timeRange[1] < 24) {
+                    queryParams.min_time = filters.timeRange[0];
+                    queryParams.max_time = filters.timeRange[1];
+                }
+                if (filters.distanceRange[0] > 0 || filters.distanceRange[1] < 1000) {
+                    queryParams.min_distance = filters.distanceRange[0];
+                    queryParams.max_distance = filters.distanceRange[1];
+                }
+
+                console.log('Параметры запроса:', JSON.stringify(queryParams));
+                try {
+                    const data = await api.getDeliveries(queryParams);
+                    console.log('Успешно получены данные:', data);
+                    console.log('Количество полученных доставок:', data.length);
+                    setDeliveries(data);
+                } catch (error) {
+                    console.error('Ошибка выполнения запроса:', error);
+                    setError(error.response?.data?.message || error.message);
+                    setDeliveries([]);
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке доставок:', error);
+                setError(error.message);
+            } finally {
+                console.log('Завершение загрузки данных');
+                setLoading(false);
+            }
+        };
+
+        fetchDeliveries();
+    }, [filters]);
 
     const handleTimeChange = (event, newValue) => {
         setFilters(prev => ({
@@ -80,14 +137,41 @@ const DeliveryList = () => {
         }));
     };
 
-    const filteredDeliveries = deliveries.filter(delivery => {
+    const handleFilterChange = (field, value) => {
+        setFilters(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const getStatusColor = (statusName) => {
+        switch (statusName) {
+            case 'Проведено':
+                return '#2e7d32'; // зеленый
+            case 'В ожидании':
+                return '#ffd600'; // желтый
+            default:
+                return '#666666';
+        }
+    };
+
+    if (loading) {
         return (
-            delivery.time >= filters.timeRange[0] &&
-            delivery.time <= filters.timeRange[1] &&
-            delivery.distance >= filters.distanceRange[0] &&
-            delivery.distance <= filters.distanceRange[1]
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <CircularProgress />
+            </Box>
         );
-    });
+    }
+
+    if (error) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <Alert severity="error" sx={{ maxWidth: 600 }}>
+                    Ошибка загрузки: {error}
+                </Alert>
+            </Box>
+        );
+    }
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -140,7 +224,66 @@ const DeliveryList = () => {
                         backgroundColor: '#f8f9fa',
                     }}
                 >
-                    <Grid container spacing={4}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                label="Поиск"
+                                value={filters.search}
+                                onChange={(e) => handleFilterChange('search', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Статус</InputLabel>
+                                <Select
+                                    value={filters.status}
+                                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                                    label="Статус"
+                                >
+                                    <MenuItem value="">Все</MenuItem>
+                                    {filterOptions.statuses.map((status) => (
+                                        <MenuItem key={status.id} value={status.id}>
+                                            {status.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Тип груза</InputLabel>
+                                <Select
+                                    value={filters.cargoType}
+                                    onChange={(e) => handleFilterChange('cargoType', e.target.value)}
+                                    label="Тип груза"
+                                >
+                                    <MenuItem value="">Все</MenuItem>
+                                    {filterOptions.cargoTypes.map((type) => (
+                                        <MenuItem key={type.id} value={type.id}>
+                                            {type.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Модель транспорта</InputLabel>
+                                <Select
+                                    value={filters.transportModel}
+                                    onChange={(e) => handleFilterChange('transportModel', e.target.value)}
+                                    label="Модель транспорта"
+                                >
+                                    <MenuItem value="">Все</MenuItem>
+                                    {filterOptions.transportModels.map((model) => (
+                                        <MenuItem key={model.id} value={model.id}>
+                                            {model.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
                         <Grid item xs={12} md={6}>
                             <Typography gutterBottom>Время в пути (часы)</Typography>
                             <Slider
@@ -177,7 +320,7 @@ const DeliveryList = () => {
 
             {/* Список доставок */}
             <Grid container spacing={3}>
-                {filteredDeliveries.map((delivery) => (
+                {deliveries.map((delivery) => (
                     <Grid item xs={12} md={6} lg={4} key={delivery.id}>
                         <Card 
                             sx={{ 
@@ -197,9 +340,9 @@ const DeliveryList = () => {
                                         {delivery.number}
                                     </Typography>
                                     <Chip
-                                        label={delivery.status}
+                                        label={delivery.status.name}
                                         sx={{
-                                            backgroundColor: getStatusColor(delivery.status),
+                                            backgroundColor: getStatusColor(delivery.status.name),
                                             color: 'white',
                                             fontWeight: 500,
                                         }}
@@ -224,26 +367,26 @@ const DeliveryList = () => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography variant="body2" color="text.secondary">
-                                            Услуга
+                                            Тип груза
                                         </Typography>
                                         <Typography variant="body1">
-                                            {delivery.service}
+                                            {delivery.cargo_type.name}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography variant="body2" color="text.secondary">
-                                            Упаковка
+                                            Транспорт
                                         </Typography>
                                         <Typography variant="body1">
-                                            {delivery.packaging}
+                                            {delivery.transport_model.name}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Typography variant="body2" color="text.secondary">
-                                            Техническое состояние
+                                            Адрес доставки
                                         </Typography>
                                         <Typography variant="body1">
-                                            {delivery.technicalCondition}
+                                            {delivery.delivery_address}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -256,4 +399,4 @@ const DeliveryList = () => {
     );
 };
 
-export default DeliveryList; 
+export default DeliveryList;

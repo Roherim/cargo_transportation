@@ -11,6 +11,12 @@ import {
     FormControl,
     FormLabel,
     Chip,
+    CircularProgress,
+    Alert,
+    FormGroup,
+    FormControlLabel,
+    FormHelperText,
+    Checkbox
 } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
@@ -20,174 +26,135 @@ import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import WarningIcon from '@mui/icons-material/Warning';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import { useApplication } from '../../context/ApplicationContext';
-
-const serviceTypes = [
-    {
-        id: 'to-customer',
-        name: 'До клиента',
-        icon: <LocalShippingIcon sx={{ fontSize: 40 }} />,
-        description: 'Доставка до двери клиента',
-    },
-    {
-        id: 'warehouse-transfer',
-        name: 'Перемещение между складами',
-        icon: <WarehouseIcon sx={{ fontSize: 40 }} />,
-        description: 'Транспортировка между складскими помещениями',
-    },
-    {
-        id: 'individual',
-        name: 'Физ. лицо',
-        icon: <PersonIcon sx={{ fontSize: 40 }} />,
-        description: 'Доставка для физических лиц',
-    },
-    {
-        id: 'legal',
-        name: 'Юр. лицо',
-        icon: <BusinessIcon sx={{ fontSize: 40 }} />,
-        description: 'Доставка для юридических лиц',
-    },
-    {
-        id: 'medical',
-        name: 'Мед. товары',
-        icon: <LocalPharmacyIcon sx={{ fontSize: 40 }} />,
-        description: 'Транспортировка медицинских товаров',
-    },
-    {
-        id: 'fragile',
-        name: 'Хрупкий груз',
-        icon: <WarningIcon sx={{ fontSize: 40 }} />,
-        description: 'Особая осторожность при транспортировке',
-    },
-    {
-        id: 'temperature',
-        name: 'Температурный режим',
-        icon: <ThermostatIcon sx={{ fontSize: 40 }} />,
-        description: 'Соблюдение температурного режима',
-    },
-];
+import { api } from '../../services/api';
 
 const Services = () => {
     const { applicationData, updateFormData } = useApplication();
-    const [selectedServices, setSelectedServices] = useState(applicationData.servicesData.services || []);
+    const [selectedServices, setSelectedServices] = useState([]);
+    const [services, setServices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        updateFormData('servicesData', {
-            services: selectedServices
-        });
-    }, [selectedServices]);
-
-    const handleServiceToggle = (serviceId) => {
-        setSelectedServices(prev => {
-            if (prev.includes(serviceId)) {
-                return prev.filter(id => id !== serviceId);
-            } else {
-                return [...prev, serviceId];
+        const fetchServices = async () => {
+            try {
+                const data = await api.getOptions();
+                if (data?.services) {
+                    setServices(data.services);
+                    if (applicationData.servicesData?.services) {
+                        setSelectedServices(applicationData.servicesData.services);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching services:', error);
+                setError('Ошибка при загрузке услуг');
+            } finally {
+                setLoading(false);
             }
+        };
+        fetchServices();
+    }, []);
+
+    const handleServiceChange = (serviceId) => (event) => {
+        const newSelectedServices = event.target.checked
+            ? [...selectedServices, serviceId]
+            : selectedServices.filter(id => id !== serviceId);
+
+        setSelectedServices(newSelectedServices);
+        updateFormData('servicesData', {
+            services: newSelectedServices
         });
     };
 
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <Alert severity="error">{error}</Alert>
+            </Box>
+        );
+    }
+
+    if (!services.length) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <Alert severity="warning">Нет доступных услуг</Alert>
+            </Box>
+        );
+    }
+
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Paper 
-                elevation={3} 
+            <Typography 
+                variant="h4" 
+                gutterBottom 
                 sx={{ 
-                    p: { xs: 2, md: 4 },
-                    borderRadius: '12px',
-                    backgroundColor: '#ffffff',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    mb: 4, 
+                    fontWeight: 600,
+                    color: '#1a237e',
+                    fontSize: { xs: '1.5rem', md: '2rem' },
+                    textAlign: 'center',
                 }}
             >
-                <Typography 
-                    variant="h4" 
-                    gutterBottom 
-                    sx={{ 
-                        mb: 4, 
-                        fontWeight: 600,
-                        color: '#1a237e',
-                        fontSize: { xs: '1.5rem', md: '2rem' },
-                        textAlign: 'center',
-                    }}
-                >
-                    Выбор услуг
-                </Typography>
+                Выбор дополнительных услуг
+            </Typography>
 
-                <FormControl component="fieldset" sx={{ width: '100%' }}>
-                    <FormLabel 
-                        component="legend" 
-                        sx={{ 
-                            mb: 3, 
-                            color: '#1a237e', 
-                            fontWeight: 500,
-                            fontSize: '1.1rem',
-                        }}
-                    >
-                        Выберите необходимые услуги
-                    </FormLabel>
-
-                    {/* Выбранные услуги */}
-                    {selectedServices.length > 0 && (
-                        <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                            {selectedServices.map(serviceId => {
-                                const service = serviceTypes.find(s => s.id === serviceId);
-                                return (
-                                    <Chip
-                                        key={serviceId}
-                                        label={service.name}
-                                        onDelete={() => handleServiceToggle(serviceId)}
-                                        sx={{
-                                            backgroundColor: '#e3f2fd',
-                                            color: '#1a237e',
-                                            '& .MuiChip-deleteIcon': {
-                                                color: '#1a237e',
-                                                '&:hover': {
-                                                    color: '#283593',
-                                                },
-                                            },
-                                        }}
+            <Box sx={{ maxWidth: 600, mx: 'auto', p: 3 }}>
+                <FormControl component="fieldset" fullWidth>
+                    <FormLabel component="legend">Дополнительные услуги</FormLabel>
+                    <FormGroup>
+                        {services.map((service) => (
+                            <FormControlLabel
+                                key={service.id}
+                                control={
+                                    <Checkbox
+                                        checked={selectedServices.includes(service.id)}
+                                        onChange={handleServiceChange(service.id)}
                                     />
-                                );
-                            })}
-                        </Box>
-                    )}
-
-                    <Grid container spacing={3}>
-                        {serviceTypes.map((service) => (
-                            <Grid item xs={12} sm={6} md={4} key={service.id}>
-                                <Card 
-                                    sx={{ 
-                                        height: '100%',
-                                        border: selectedServices.includes(service.id) ? '2px solid #1a237e' : 'none',
-                                        transition: 'all 0.3s ease',
-                                        '&:hover': {
-                                            transform: 'translateY(-4px)',
-                                            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1)',
-                                        },
-                                    }}
-                                >
-                                    <CardActionArea 
-                                        onClick={() => handleServiceToggle(service.id)}
-                                        sx={{ height: '100%' }}
-                                    >
-                                        <CardContent sx={{ textAlign: 'center', p: 3 }}>
-                                            <Box sx={{ mb: 2, color: selectedServices.includes(service.id) ? '#1a237e' : 'inherit' }}>
-                                                {service.icon}
-                                            </Box>
-                                            <Typography variant="h6" gutterBottom>
-                                                {service.name}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {service.description}
-                                            </Typography>
-                                        </CardContent>
-                                    </CardActionArea>
-                                </Card>
-                            </Grid>
+                                }
+                                label={service.name}
+                            />
                         ))}
-                    </Grid>
+                    </FormGroup>
+                    {!selectedServices.length && (
+                        <FormHelperText error>
+                            Выберите хотя бы одну услугу
+                        </FormHelperText>
+                    )}
                 </FormControl>
-            </Paper>
+            </Box>
         </Container>
     );
+};
+
+const getServiceIcon = (serviceName) => {
+    const iconProps = { sx: { fontSize: 40 } };
+    
+    switch (serviceName.toLowerCase()) {
+        case 'доставка до двери':
+            return <LocalShippingIcon {...iconProps} />;
+        case 'складское хранение':
+            return <WarehouseIcon {...iconProps} />;
+        case 'для физических лиц':
+            return <PersonIcon {...iconProps} />;
+        case 'для юридических лиц':
+            return <BusinessIcon {...iconProps} />;
+        case 'медицинские товары':
+            return <LocalPharmacyIcon {...iconProps} />;
+        case 'хрупкий груз':
+            return <WarningIcon {...iconProps} />;
+        case 'температурный режим':
+            return <ThermostatIcon {...iconProps} />;
+        default:
+            return <LocalShippingIcon {...iconProps} />;
+    }
 };
 
 export default Services; 

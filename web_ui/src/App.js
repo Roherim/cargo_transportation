@@ -1,8 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { ApplicationProvider } from './context/ApplicationContext';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import darkTheme from './theme';
+import Navigation from './components/navigation/navigation';
 
 // Компоненты страниц
 import Auth from './components/auth/auth';
@@ -14,24 +17,47 @@ import Packaging from './components/packaging/packaging';
 import Services from './components/services/services';
 import DateTime from './components/datetime/datetime';
 import Model from './components/model/model';
-
+import ClientList from './components/clients/ClientList';
+import ClientDetails from './components/clients/ClientDetails';
+import DeliveryReport from './components/delivery_report/DeliveryReport';
+import PrivetRoutes from './components/privet_routes.jsx';  
+import { useState } from 'react';
 /**
  * Главный компонент приложения
  * Определяет маршрутизацию и оборачивает приложение в контекст
  */
+
 function App() {
+  const [link, setLink] = useState(localStorage.getItem('link') === null ? '/login' : localStorage.getItem('link'))
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <ApplicationProvider>
-        <Routes>
-          {/* Основные маршруты */}
-          <Route path="/" element={<DeliveryList />} />
-          <Route path="/login" element={<Auth />} />
-          <Route path="/new_delivery" element={<NewDelivery />} />
-          <Route path="/delivery/:id" element={<EditDelivery />} />
-        </Routes>
-      </ApplicationProvider>
+      <Route path="/login" element={<Auth link={link} setLink={setLink}/>} />
+      <PrivetRoutes link={link} >
+        <ApplicationProvider>
+          <Routes>
+            {/* Публичные маршруты */}
+            
+
+            {/* Защищенные маршруты */}
+            <Route path="/" element={
+             
+                <Navigation />
+            
+            }>
+              <Route index element={<DeliveryList />} />
+              <Route path="new_delivery" element={<NewDelivery />} />
+              <Route path="delivery/:id" element={<EditDelivery />} />
+              <Route path="clients" element={<ClientList />} />
+              <Route path="clients/:id" element={<ClientDetails />} />
+              <Route path="report" element={<DeliveryReport />} />
+            </Route>
+
+            {/* Перенаправление несуществующих маршрутов на логин */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </ApplicationProvider>
+      </PrivetRoutes>
     </ThemeProvider>
   );
 }

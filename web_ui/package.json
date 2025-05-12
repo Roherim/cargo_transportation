@@ -2,20 +2,29 @@
   "name": "web_ui",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8000",
   "dependencies": {
-    "@emotion/react": "^11.10.6",
-    "@emotion/styled": "^11.10.6",
-    "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.11.16",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-hook-form": "^7.43.9",
-    "react-router-dom": "^6.8.2",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "@babel/runtime": "7.23.9",
+    "@emotion/react": "11.11.3",
+    "@emotion/styled": "11.11.0",
+    "@mui/icons-material": "5.15.10",
+    "@mui/material": "5.15.10",
+    "@mui/x-date-pickers": "^6.18.7",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.6.7",
+    "date-fns": "^2.30.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hook-form": "7.50.1",
+    "react-router-dom": "6.22.0",
+    "react-scripts": "^5.0.1",
+    "recharts": "2.12.0",
+    "web-vitals": "2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set BROWSER=none && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -37,5 +46,18 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devServer": {
+    "headers": {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    },
+    "hot": true,
+    "liveReload": true
+  },
+  "devDependencies": {
+    "ajv": "^8.12.0",
+    "ajv-keywords": "^5.1.0"
   }
 }

@@ -1,100 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Container,
-    Typography,
-    Box,
-    Paper,
-    TextField,
-    Grid,
-    IconButton,
-    Tooltip,
-} from '@mui/material';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import React from 'react';
+import { Container, Typography, Box, Grid, FormControl, TextField } from '@mui/material';
 import { useApplication } from '../../context/ApplicationContext';
 
 const AddressMap = () => {
     const { applicationData, updateFormData } = useApplication();
-    const [fromAddress, setFromAddress] = useState(applicationData.addressData.fromAddress || '');
-    const [toAddress, setToAddress] = useState(applicationData.addressData.toAddress || '');
-    const [distance, setDistance] = useState(applicationData.addressData.distance || 0);
 
-    // Обновляем данные в контексте при изменении полей формы
-    useEffect(() => {
+    const handleAddressChange = (type) => (event) => {
         updateFormData('addressData', {
-            fromAddress,
-            toAddress,
-            distance
+            ...applicationData.addressData,
+            [type]: event.target.value
         });
-    }, [fromAddress, toAddress, distance]);
-
-    const handleSwapAddresses = () => {
-        setFromAddress(toAddress);
-        setToAddress(fromAddress);
     };
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-            <Paper 
-                elevation={3} 
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Typography 
+                variant="h4" 
+                gutterBottom 
                 sx={{ 
-                    p: { xs: 2, md: 4 },
-                    borderRadius: '12px',
-                    backgroundColor: '#ffffff',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    mb: 4, 
+                    fontWeight: 600,
+                    color: '#1a237e',
+                    fontSize: { xs: '1.5rem', md: '2rem' },
+                    textAlign: 'center',
                 }}
             >
-                <Typography 
-                    variant="h4" 
-                    gutterBottom 
-                    sx={{ 
-                        mb: 4, 
-                        fontWeight: 600,
-                        color: '#1a237e',
-                        fontSize: { xs: '1.5rem', md: '2rem' },
-                        textAlign: 'center',
-                    }}
-                >
-                    Адреса и расстояние
-                </Typography>
+                Выбор адресов
+            </Typography>
 
+            <Box sx={{ maxWidth: 600, mx: 'auto', p: 3 }}>
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: '600px', mx: 'auto' }}>
+                        <FormControl fullWidth>
                             <TextField
-                                fullWidth
-                                label="Откуда"
-                                value={fromAddress}
-                                onChange={(e) => setFromAddress(e.target.value)}
-                                placeholder="Введите адрес отправления"
+                                label="Адрес отправления"
+                                value={applicationData.addressData?.pickup_address || ''}
+                                onChange={handleAddressChange('pickup_address')}
+                                error={!applicationData.addressData?.pickup_address}
+                                helperText={!applicationData.addressData?.pickup_address ? "Введите адрес отправления" : ""}
                             />
-                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                <Tooltip title="Поменять местами">
-                                    <IconButton onClick={handleSwapAddresses}>
-                                        <SwapHorizIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
                             <TextField
-                                fullWidth
-                                label="Куда"
-                                value={toAddress}
-                                onChange={(e) => setToAddress(e.target.value)}
-                                placeholder="Введите адрес назначения"
+                                label="Адрес доставки"
+                                value={applicationData.addressData?.delivery_address || ''}
+                                onChange={handleAddressChange('delivery_address')}
+                                error={!applicationData.addressData?.delivery_address}
+                                helperText={!applicationData.addressData?.delivery_address ? "Введите адрес доставки" : ""}
                             />
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
                             <TextField
-                                fullWidth
-                                label="Дистанция (км)"
+                                label="Расстояние (км)"
                                 type="number"
-                                value={distance}
-                                onChange={(e) => setDistance(Number(e.target.value))}
-                                InputProps={{
-                                    inputProps: { min: 0 }
-                                }}
+                                value={applicationData.addressData?.distance || ''}
+                                onChange={handleAddressChange('distance')}
+                                InputProps={{ inputProps: { min: 0, step: 0.1 } }}
+                                error={!applicationData.addressData?.distance}
+                                helperText={!applicationData.addressData?.distance ? "Введите расстояние" : ""}
                             />
-                        </Box>
+                        </FormControl>
                     </Grid>
                 </Grid>
-            </Paper>
+            </Box>
         </Container>
     );
 };
