@@ -1,10 +1,11 @@
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Box, Container, Paper, Typography, TextField, Button, Grid, Link } from '@mui/material';
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { API_CONFIG } from '../../config/api.config';
-
+localStorage.setItem('link','/')
+localStorage.setItem('logged', 'true')
 const Auth = ({link, setLink}) => {
     const[logged, setLogged]=useState(localStorage.getItem('logged'))
     const [isLogin, setIsLogin] = useState(true);
@@ -83,10 +84,10 @@ const Auth = ({link, setLink}) => {
             [e.target.name]: e.target.value
         });
     };
-        let flag = link === "/login";
+    let flag = link === "/login";
 
     if (logged === "true" && flag === false) {
-      return navigate(link);
+      return  <Navigate to={link}/>;
     } else 
     return (
         

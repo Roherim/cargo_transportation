@@ -1,17 +1,16 @@
-import { useEffect } from "react";
-import { Navigate } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+// components/privet_routes.jsx
+import { Navigate, Outlet } from 'react-router-dom';
 
-const PrivetRoutes = ({ children, link }) => {
-  let token = localStorage.getItem("token")
-  if (token === "null" || token === null) {
-    localStorage.setItem("logged", false);
-    window.location.href = '/login';
-  }
-  else{
-    return children;
-  }
+const PrivetRoutes = ({ link }) => {
+  const logged = localStorage.getItem('logged');
+  console.log('PrivetRoutes: logged =', logged);
 
-  
+  if (logged !== 'true') {
+    console.log('PrivetRoutes: Перенаправление на /login');
+    return <Navigate to="/login" replace />;
+  }
+  console.log('PrivetRoutes: Рендеринг защищённых маршрутов');
+  return <Outlet />; // Явно возвращаем Outlet для рендера вложенных маршрутов
 };
+
 export default PrivetRoutes;
