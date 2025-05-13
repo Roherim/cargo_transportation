@@ -46,28 +46,28 @@ const DeliveryList = () => {
     });
 
     // Загрузка опций для фильтров
-    useEffect(() => {
-        const fetchFilterOptions = async () => {
-            try {
-                const [statuses, cargoTypes, transportModels] = await Promise.all([
-                    api.getDeliveryStatuses(),
-                    api.getCargoTypes(),
-                    api.getTransportModels()
-                ]);
+    // useEffect(() => {
+    //     const fetchFilterOptions = async () => {
+    //         try {
+    //             const [statuses, cargoTypes, transportModels] = await Promise.all([
+    //                 api.getDeliveryStatuses(),
+    //                 api.getCargoTypes(),
+    //                 api.getTransportModels()
+    //             ]);
 
-                setFilterOptions({
-                    statuses,
-                    cargoTypes,
-                    transportModels
-                });
-            } catch (error) {
-                console.error('Error fetching filter options:', error);
-                setError(error.message);
-            }
-        };
+    //             setFilterOptions({
+    //                 statuses,
+    //                 cargoTypes,
+    //                 transportModels
+    //             });
+    //         } catch (error) {
+    //             console.error('Error fetching filter options:', error);
+    //             setError(error.message);
+    //         }
+    //     };
 
-        fetchFilterOptions();
-    }, []);
+    //     fetchFilterOptions();
+    // }, []);
 
     // Загрузка доставок с фильтрами
     useEffect(() => {
@@ -121,7 +121,7 @@ const DeliveryList = () => {
         };
 
         fetchDeliveries();
-    }, [filters]);
+    }, []);
 
     const handleTimeChange = (event, newValue) => {
         setFilters(prev => ({

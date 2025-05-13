@@ -1,4 +1,3 @@
-// Конфигурация API
 const API_BASE_URL = 'http://localhost:8000';
 
 export const API_CONFIG = {
@@ -18,10 +17,11 @@ export const API_CONFIG = {
             LIST: `${API_BASE_URL}/api/delivery/list/`,
             NEW: `${API_BASE_URL}/api/delivery/new/`,
             UPDATE: (id) => `${API_BASE_URL}/api/delivery/${id}/update/`,
-            REPORT: `${API_BASE_URL}/api/delivery/report/`
+            REPORT: `${API_BASE_URL}/api/delivery/report/`,
+            GET: `${API_BASE_URL}/api/delivery/get/`  // Убрали динамический ID
         },
         EXPORT: {
             DATA: `${API_BASE_URL}/api/export/`
         }
     }
-}; 
+};

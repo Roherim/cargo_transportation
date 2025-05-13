@@ -44,55 +44,55 @@ const EditDelivery = () => {
     const [saving, setSaving] = useState(false);
 
     const initializeData = useCallback(async () => {
-        if (isInitialized) return;
+    if (isInitialized) return;
+    
+    try {
+        setIsLoading(true);
+        console.log('Fetching delivery data for id:', id);
+        const data = await api.getDelivery(id);
+        console.log('Received delivery data:', data);
         
-        try {
-            setIsLoading(true);
-            console.log('Fetching delivery data for id:', id);
-            const data = await api.getDelivery(id);
-            console.log('Received delivery data:', data);
+        if (data) {
+            const formattedData = {
+                modelData: {
+                    model: data.transport_model.id,
+                    number: data.transport_number
+                },
+                dateTimeData: {
+                    departure_date: data.date,
+                    departure_time: data.time,
+                    arrival_date: data.arrival_date,
+                    arrival_time: data.arrival_time,
+                    travel_time: data.travel_time  
+                },
+                addressData: {
+                    fromAddress: data.pickup_address,
+                    toAddress: data.delivery_address,
+                    distance: data.distance
+                },
+                packagingData: {
+                    packaging: data.packaging_type.id
+                },
+                servicesData: {
+                    services: data.services.map(s => s.id)
+                }
+            };
+            console.log('Formatted data:', formattedData);
             
-            if (data) {
-                const formattedData = {
-                    modelData: {
-                        model: data.transport_model.id,
-                        number: data.transport_number
-                    },
-                    dateTimeData: {
-                        departureDate: data.departure_date,
-                        departureTime: data.departure_time,
-                        arrivalDate: data.arrival_date,
-                        arrivalTime: data.arrival_time,
-                        travelTime: data.travel_time
-                    },
-                    addressData: {
-                        fromAddress: data.pickup_address,
-                        toAddress: data.delivery_address,
-                        distance: data.distance
-                    },
-                    packagingData: {
-                        packaging: data.packaging_type.id
-                    },
-                    servicesData: {
-                        services: data.services.map(s => s.id)
-                    }
-                };
-                console.log('Formatted data:', formattedData);
-                
-                updateFormData('modelData', formattedData.modelData);
-                updateFormData('dateTimeData', formattedData.dateTimeData);
-                updateFormData('addressData', formattedData.addressData);
-                updateFormData('packagingData', formattedData.packagingData);
-                updateFormData('servicesData', formattedData.servicesData);
-                setIsInitialized(true);
-            }
-        } catch (error) {
-            console.error('Error fetching delivery:', error);
-            setError('Ошибка при загрузке данных доставки');
-        } finally {
-            setIsLoading(false);
+            updateFormData('modelData', formattedData.modelData);
+            updateFormData('datetimeData', formattedData.dateTimeData);
+            updateFormData('addressData', formattedData.addressData);
+            updateFormData('packagingData', formattedData.packagingData);
+            updateFormData('servicesData', formattedData.servicesData);
+            setIsInitialized(true);
         }
-    }, [id, updateFormData, isInitialized]);
+    } catch (error) {
+        console.error('Error fetching delivery:', error);
+        setError('Ошибка при загрузке данных доставки');
+    } finally {
+        setIsLoading(false);
+    }
+}, [id, updateFormData, isInitialized]);
 
     useEffect(() => {
         initializeData();

@@ -89,7 +89,7 @@ const DeliveryForm = () => {
                         cargo_type: delivery.cargo_type.id,
                         status: delivery.status.id,
                         distance: delivery.distance,
-                        time: delivery.time,
+                        arrival_time: delivery.arrival_time,  // Исправлено
                         delivery_address: delivery.delivery_address,
                         pickup_address: delivery.pickup_address,
                         notes: delivery.notes || ''

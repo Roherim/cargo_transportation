@@ -5,6 +5,7 @@ from django.views.decorators.http import require_http_methods
 from django.core.serializers import serialize
 from rest_framework.authentication import TokenAuthentication
 from .models import CustomToken
+from rest_framework import mixins
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.decorators import api_view, permission_classes
@@ -332,6 +333,78 @@ def new_delivery(request):
         }, status=400)
 
 @csrf_exempt
+@require_http_methods(["POST", "OPTIONS"])
+@token_required
+def get_delivery(request):
+    """Получение информации о доставке по ID через POST"""
+    if request.method == "OPTIONS":
+        response = HttpResponse()
+        response["Access-Control-Allow-Origin"] = request.headers.get("Origin", "*")
+        response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response["Access-Control-Allow-Credentials"] = "true"
+        return response
+
+    try:
+        data = json.loads(request.body)
+        print("Received data for get_delivery:", data)  # Логируем полученные данные
+
+        delivery_id = data.get('id')
+        if not delivery_id:
+            print("No delivery ID provided")
+            return JsonResponse({'error': 'Delivery ID is required'}, status=400)
+
+        print(f"Fetching delivery with ID: {delivery_id}")
+        delivery = Delivery.objects.get(id=delivery_id)
+        print("Found delivery:", delivery)
+
+        # Формируем данные в формате, соответствующем ожиданиям setFormData
+        delivery_data = {
+            'id': delivery.id,
+            'number': delivery.number,
+            'date': delivery.departure_date.strftime('%Y-%m-%d'),  # Соответствует departure_date
+            'time': delivery.departure_time.strftime('%H:%M') if delivery.departure_time else '',  # Соответствует departure_time
+            'arrival_date': delivery.arrival_date.strftime('%Y-%m-%d'),  # Добавлено для полноты
+            'arrival_time': delivery.arrival_time.strftime('%H:%M') if delivery.arrival_time else '',  # Второй time, скорее всего, arrival_time
+            'transport_model': {
+                'id': delivery.transport_model.id,
+                'name': delivery.transport_model.name
+            },
+            'transport_number': delivery.transport_number,
+            'cargo_type': {
+                'id': delivery.cargo_type.id,
+                'name': delivery.cargo_type.name
+            },
+            'status': {
+                'id': delivery.status.id,
+                'name': delivery.status.name
+            },
+            'distance': float(delivery.travel_time),  # Соответствует travel_time
+            'delivery_address': delivery.delivery_address,
+            'pickup_address': delivery.pickup_address,
+            'notes': delivery.notes or '',
+            # Дополнительные поля из модели Delivery
+            'packaging_type': {
+                'id': delivery.packaging_type.id,
+                'name': delivery.packaging_type.name
+            },
+            'services': [service.id for service in delivery.services.all()],
+            'travel_time': float(delivery.travel_time)  # Для совместимости с другими частями
+        }
+
+        print("Returning delivery data:", delivery_data)
+        return JsonResponse(delivery_data, safe=False)
+
+    except Delivery.DoesNotExist:
+        print(f"Delivery not found for ID: {delivery_id}")
+        return JsonResponse({'error': 'Delivery not found'}, status=404)
+    except json.JSONDecodeError as e:
+        print("JSON decode error:", str(e))
+        return JsonResponse({'error': f'Invalid JSON: {str(e)}'}, status=400)
+    except Exception as e:
+        print("Unexpected error in get_delivery:", str(e))
+        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=400)
+
 @require_http_methods(["PUT"])
 def update_delivery(request, delivery_id):
     """Обновление доставки"""
@@ -591,6 +664,19 @@ class DeliveryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+class GetDeliverySet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = Delivery.objects.all()  
+    serializer_class = DeliverySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        try:
+            instance = super().get_object()
+            print(f"GetDeliverySet: Retrieved delivery with ID {instance.id} for user {self.request.user.username}")
+            return instance
+        except Delivery.DoesNotExist:
+            print(f"GetDeliverySet: Delivery with ID {self.kwargs.get('pk')} not found")
+            raise
 
 @csrf_exempt
 @require_http_methods(["POST"])

@@ -193,7 +193,24 @@ const api = {
             throw new Error(error.message || 'Ошибка удаления доставки');
         }
     },
-
+    async getDelivery(id) {
+        try {
+            const response = await fetch(API_CONFIG.ENDPOINTS.DELIVERY.GET, {
+                method: 'POST',  // Изменили на POST
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id }),  // Передаём ID в теле
+                mode: 'cors',
+            });
+            const responseData = await handleResponse(response);
+            return responseData;
+        } catch (error) {
+            console.error('Get delivery failed:', error);
+            throw new Error(error.message || 'Ошибка получения доставки');
+        }
+    },
     // Отчеты
     async getDeliveryReport(filters = {}) {
         try {

@@ -28,8 +28,8 @@ const DeliveryEdit = () => {
                 });
                 
                 updateFormData('datetimeData', {
-                    departure_date: delivery.departure_date,
-                    departure_time: delivery.departure_time,
+                    departure_date: delivery.date,
+                    departure_time: delivery.time,
                     arrival_date: delivery.arrival_date,
                     arrival_time: delivery.arrival_time,
                     travel_time: delivery.travel_time

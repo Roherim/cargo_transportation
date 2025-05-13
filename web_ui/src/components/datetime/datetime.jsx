@@ -11,7 +11,7 @@ const DateTime = () => {
             [type]: event.target.value
         });
     };
-
+console.log(applicationData.datetimeData)
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Typography 

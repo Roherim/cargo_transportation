@@ -4,8 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Box, Container, Paper, Typography, TextField, Button, Grid, Link } from '@mui/material';
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { API_CONFIG } from '../../config/api.config';
-localStorage.setItem('link','/')
-localStorage.setItem('logged', 'true')
+
 const Auth = ({link, setLink}) => {
     const[logged, setLogged]=useState(localStorage.getItem('logged'))
     const [isLogin, setIsLogin] = useState(true);
@@ -45,6 +44,7 @@ const Auth = ({link, setLink}) => {
           localStorage.setItem('/', JSON.stringify(user));
           setToken(token);
           setUser(user);
+          navigate('/');
           return { success: true };
         } catch (error) {
           console.error('Login error:', error);
