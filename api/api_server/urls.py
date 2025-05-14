@@ -18,7 +18,7 @@ urlpatterns = [
     path('auth/logout/', views.logout_view, name='logout'),
     path('user/', views.get_user_info, name='user-info'),
     path('delivery/get/', views.get_delivery, name='get_delivery'),  # Исправили точку на запятую
-    
+    path('delivery/<int:delivery_id>/register/', views.register_delivery, name='register_delivery'),  # Исправили точку на запятую
     # Эндпоинты для опций
     path('options/', views.get_all_options, name='get_all_options'),
     

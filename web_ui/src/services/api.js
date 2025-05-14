@@ -55,6 +55,25 @@ const api = {
         }
     },
 
+    async deliveryRegister(id){
+        try {
+            const response = await fetch(API_CONFIG.ENDPOINTS.DELIVERY.REGISTER(id), {
+                method: 'PUT',
+                headers: getHeaders(),
+                mode: 'cors'
+            });
+            const responseData = await handleResponse(response);
+            if (responseData.token) {
+              localStorage.setItem('token', responseData.token);
+            }
+            return responseData;
+        }
+        catch (error) {
+            console.error('Delivery register failed:', error);
+            throw new Error(error.message || 'Ошибка регистрации доставки');
+        }
+    },
+
     async register(userData) {
         try {
             const response = await fetch(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {

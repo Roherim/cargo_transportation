@@ -19,7 +19,8 @@ export const API_CONFIG = {
             UPDATE: (id) => `${API_BASE_URL}/api/delivery/${id}/update/`,
             DELETE: (id) => `${API_BASE_URL}/api/delivery/${id}/delete/`,
             REPORT: `${API_BASE_URL}/api/delivery/report/`,
-            GET: `${API_BASE_URL}/api/delivery/get/`  // Убрали динамический ID
+            GET: `${API_BASE_URL}/api/delivery/get/`,
+            REGISTER: (id) => `${API_BASE_URL}/api/delivery/${id}/register/`,
         },
         EXPORT: {
             DATA: `${API_BASE_URL}/api/export/`

@@ -44,55 +44,55 @@ const EditDelivery = () => {
     const [saving, setSaving] = useState(false);
 
     const initializeData = useCallback(async () => {
-    if (isInitialized) return;
-    
-    try {
-        setIsLoading(true);
-        console.log('Fetching delivery data for id:', id);
-        const data = await api.getDelivery(id);
-        console.log('Received delivery data:', data);
-        
-        if (data) {
-            const formattedData = {
-                modelData: {
-                    model: data.transport_model.id,
-                    number: data.transport_number
-                },
-                dateTimeData: {
-                    departure_date: data.date,
-                    departure_time: data.time,
-                    arrival_date: data.arrival_date,
-                    arrival_time: data.arrival_time,
-                    travel_time: data.travel_time  
-                },
-                addressData: {
-                    pickup_address: data.pickup_address,
-                    delivery_address: data.delivery_address,
-                    distance: data.distance
-                },
-                packagingData: {
-                    packaging: data.packaging_type.id
-                },
-                servicesData: {
-                    services: data.services
-                }
-            };
-            console.log('Formatted data:', formattedData);
-            
-            updateFormData('modelData', formattedData.modelData);
-            updateFormData('datetimeData', formattedData.dateTimeData);
-            updateFormData('addressData', formattedData.addressData);
-            updateFormData('packagingData', formattedData.packagingData);
-            updateFormData('servicesData', formattedData.servicesData);
-            setIsInitialized(true);
+        if (isInitialized) return;
+
+        try {
+            setIsLoading(true);
+            console.log('Fetching delivery data for id:', id);
+            const data = await api.getDelivery(id);
+            console.log('Received delivery data:', data);
+
+            if (data) {
+                const formattedData = {
+                    modelData: {
+                        model: data.transport_model.id,
+                        number: data.transport_number
+                    },
+                    dateTimeData: {
+                        departure_date: data.date,
+                        departure_time: data.time,
+                        arrival_date: data.arrival_date,
+                        arrival_time: data.arrival_time,
+                        travel_time: data.travel_time
+                    },
+                    addressData: {
+                        pickup_address: data.pickup_address,
+                        delivery_address: data.delivery_address,
+                        distance: data.distance
+                    },
+                    packagingData: {
+                        packaging: data.packaging_type.id
+                    },
+                    servicesData: {
+                        services: data.services
+                    }
+                };
+                console.log('Formatted data:', formattedData);
+
+                updateFormData('modelData', formattedData.modelData);
+                updateFormData('datetimeData', formattedData.dateTimeData);
+                updateFormData('addressData', formattedData.addressData);
+                updateFormData('packagingData', formattedData.packagingData);
+                updateFormData('servicesData', formattedData.servicesData);
+                setIsInitialized(true);
+            }
+        } catch (error) {
+            console.error('Error fetching delivery:', error);
+            setError('Ошибка при загрузке данных доставки');
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error('Error fetching delivery:', error);
-        setError('Ошибка при загрузке данных доставки');
-    } finally {
-        setIsLoading(false);
-    }
-}, [id, updateFormData, isInitialized]);
+    }, [id, updateFormData, isInitialized]);
 
     useEffect(() => {
         initializeData();
@@ -201,14 +201,14 @@ const EditDelivery = () => {
             case 0:
                 return applicationData.modelData?.model && applicationData.modelData?.number;
             case 1:
-                return applicationData.datetimeData?.departure_date && 
-                       applicationData.datetimeData?.departure_time && 
-                       applicationData.datetimeData?.arrival_date && 
-                       applicationData.datetimeData?.arrival_time && 
-                       applicationData.datetimeData?.travel_time;
+                return applicationData.datetimeData?.departure_date &&
+                    applicationData.datetimeData?.departure_time &&
+                    applicationData.datetimeData?.arrival_date &&
+                    applicationData.datetimeData?.arrival_time &&
+                    applicationData.datetimeData?.travel_time;
             case 2:
-                return applicationData.addressData?.pickup_address && 
-                       applicationData.addressData?.delivery_address;
+                return applicationData.addressData?.pickup_address &&
+                    applicationData.addressData?.delivery_address;
             case 3:
                 return applicationData.packagingData?.packaging;
             case 4:
@@ -271,14 +271,7 @@ const EditDelivery = () => {
                             >
                                 {saving ? <CircularProgress size={24} /> : 'Сохранить'}
                             </Button>
-                            <Button
-                                variant="outlined"
-                                color="error"
-                                onClick={() => setShowConfirmDialog(true)}
-                                sx={{ ml: 1 }}
-                            >
-                                Удалить
-                            </Button>
+
                         </>
                     ) : (
                         <Button
@@ -290,6 +283,23 @@ const EditDelivery = () => {
                             Далее
                         </Button>
                     )}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {api.deliveryRegister(id ); navigate('/');}}
+                        sx={{ ml: 1 }}
+                    >
+                        Провести
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => setShowConfirmDialog(true)}
+                        sx={{ ml: 1 }}
+                    >
+                        Удалить
+                    </Button>
+                    
                 </Box>
             </Box>
 

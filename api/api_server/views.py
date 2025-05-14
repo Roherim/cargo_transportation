@@ -335,6 +335,45 @@ def new_delivery(request):
             'error': f'Unexpected error: {str(e)}'
         }, status=400)
 
+ 
+@csrf_exempt
+@require_http_methods(["PUT", "OPTIONS"])
+@token_required
+def register_delivery(request, delivery_id):
+    """Обновление доставки"""
+    try:
+       
+        delivery = Delivery.objects.get(id=delivery_id)
+        print("Found delivery:", delivery)  # Логируем найденную доставку
+        
+        delivery.status = DeliveryStatus.objects.get(id=2)
+            
+        try:
+            delivery.save()
+            print("Delivery updated successfully:", delivery)  # Логируем успешное обновление
+            
+            return JsonResponse({
+                'id': delivery.id,
+                'message': 'Delivery updated successfully'
+            })
+        except Exception as e:
+            print("Error saving delivery:", str(e))  # Логируем ошибку сохранения
+            return JsonResponse({
+                'error': f'Error saving delivery: {str(e)}'
+            }, status=400)
+            
+   
+    except json.JSONDecodeError as e:
+        print("Invalid JSON:", str(e))  # Логируем ошибку JSON
+        return JsonResponse({
+            'error': f'Invalid JSON: {str(e)}'
+        }, status=400)
+    except Exception as e:
+        print("Unexpected error:", str(e))  # Логируем неожиданную ошибку
+        return JsonResponse({
+            'error': str(e)
+        }, status=400)
+        
 @csrf_exempt
 @require_http_methods(["POST", "OPTIONS"])
 @token_required
