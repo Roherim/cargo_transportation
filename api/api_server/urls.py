@@ -25,7 +25,8 @@ urlpatterns = [
     # Эндпоинты для доставок
     path('delivery/list/', views.delivery_list, name='delivery_list'),
     path('delivery/new/', views.new_delivery, name='new_delivery'),
-    path('delivery/<int:delivery_id>/update/', views.update_delivery, name='update_delivery'),
+    
+    path('delivery/<int:delivery_id>/delete/', views.delete_delivery, name='delete_delivery'),
     
     # Эндпоинты для фильтров
     path('filter-options/', views.get_filter_options, name='filter-options'),

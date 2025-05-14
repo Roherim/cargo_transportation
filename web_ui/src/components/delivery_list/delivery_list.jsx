@@ -362,7 +362,7 @@ const DeliveryList = () => {
                                             Время в пути
                                         </Typography>
                                         <Typography variant="body1">
-                                            {delivery.time} ч
+                                            {delivery.travel_time} ч
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={6}>

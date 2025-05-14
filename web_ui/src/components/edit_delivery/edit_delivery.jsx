@@ -35,7 +35,7 @@ const steps = [
 const EditDelivery = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { applicationData, updateFormData, handleUpdate } = useApplication();
+    const { applicationData, updateFormData, handleUpdate, resetForm } = useApplication();
     const [activeStep, setActiveStep] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -66,15 +66,15 @@ const EditDelivery = () => {
                     travel_time: data.travel_time  
                 },
                 addressData: {
-                    fromAddress: data.pickup_address,
-                    toAddress: data.delivery_address,
+                    pickup_address: data.pickup_address,
+                    delivery_address: data.delivery_address,
                     distance: data.distance
                 },
                 packagingData: {
                     packaging: data.packaging_type.id
                 },
                 servicesData: {
-                    services: data.services.map(s => s.id)
+                    services: data.services
                 }
             };
             console.log('Formatted data:', formattedData);
@@ -119,10 +119,13 @@ const EditDelivery = () => {
             if (!applicationData.modelData?.number) {
                 throw new Error('Введите номер транспорта');
             }
-            if (!applicationData.addressData?.fromAddress) {
+            if (!applicationData.addressData?.pickup_address) {
                 throw new Error('Введите адрес отправления');
             }
-            if (!applicationData.addressData?.toAddress) {
+            if (!applicationData.addressData?.delivery_address) {
+                throw new Error('Введите адрес доставки');
+            }
+            if (!applicationData.addressData?.distance) {
                 throw new Error('Введите адрес доставки');
             }
             if (!applicationData.packagingData?.packaging) {
@@ -131,16 +134,19 @@ const EditDelivery = () => {
             if (!applicationData.servicesData?.services?.length) {
                 throw new Error('Выберите хотя бы одну услугу');
             }
-            if (!applicationData.dateTimeData?.departureDate) {
+            if (!applicationData.datetimeData?.departure_date) {
                 throw new Error('Выберите дату отправления');
             }
-            if (!applicationData.dateTimeData?.departureTime) {
+            if (!applicationData.datetimeData?.departure_time) {
                 throw new Error('Выберите время отправления');
             }
-            if (!applicationData.dateTimeData?.arrivalTime) {
+            if (!applicationData.datetimeData?.arrival_date) {
+                throw new Error('Выберите дату отправления');
+            }
+            if (!applicationData.datetimeData?.arrival_time) {
                 throw new Error('Выберите время прибытия');
             }
-            if (!applicationData.dateTimeData?.travelTime) {
+            if (!applicationData.datetimeData?.travel_time) {
                 throw new Error('Введите время в пути');
             }
 
@@ -155,6 +161,7 @@ const EditDelivery = () => {
         } finally {
             setSaving(false);
         }
+        resetForm()
     };
 
     const handleDelete = async () => {
@@ -169,6 +176,7 @@ const EditDelivery = () => {
             setIsLoading(false);
             setShowConfirmDialog(false);
         }
+        resetForm()
     };
 
     const getStepContent = (step) => {
@@ -193,14 +201,14 @@ const EditDelivery = () => {
             case 0:
                 return applicationData.modelData?.model && applicationData.modelData?.number;
             case 1:
-                return applicationData.dateTimeData?.departureDate && 
-                       applicationData.dateTimeData?.departureTime && 
-                       applicationData.dateTimeData?.arrivalDate && 
-                       applicationData.dateTimeData?.arrivalTime && 
-                       applicationData.dateTimeData?.travelTime;
+                return applicationData.datetimeData?.departure_date && 
+                       applicationData.datetimeData?.departure_time && 
+                       applicationData.datetimeData?.arrival_date && 
+                       applicationData.datetimeData?.arrival_time && 
+                       applicationData.datetimeData?.travel_time;
             case 2:
-                return applicationData.addressData?.fromAddress && 
-                       applicationData.addressData?.toAddress;
+                return applicationData.addressData?.pickup_address && 
+                       applicationData.addressData?.delivery_address;
             case 3:
                 return applicationData.packagingData?.packaging;
             case 4:

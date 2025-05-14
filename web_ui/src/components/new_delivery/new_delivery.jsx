@@ -21,7 +21,7 @@ const steps = [
 const NewDelivery = () => {
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(0);
-    const { handleSubmit, loading, error } = useApplication();
+    const { handleSubmit, loading, error, resetForm } = useApplication();
 
     const handleNext = () => {
         setActiveStep((prevStep) => prevStep + 1);
@@ -30,7 +30,7 @@ const NewDelivery = () => {
     const handleBack = () => {
         setActiveStep((prevStep) => prevStep - 1);
     };
-
+    
     const getStepContent = (step) => {
         switch (step) {
             case 0:

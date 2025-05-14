@@ -1,10 +1,18 @@
 import { API_CONFIG } from '../config/api.config';
-
+import { useNavigate } from 'react-router-dom';
 // Вспомогательные функции
+navigate = useNavigate();
 const handleResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+            localStorage.setItem('token', null);
+            localStorage.setItem('link','/login')
+            navigate('/login')
+
+        }
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        
     }
     return response.json();
 };
@@ -233,7 +241,21 @@ const api = {
             throw new Error(error.message || 'Ошибка получения отчета');
         }
     },
-
+    async getAllOptions() {
+        try {
+            const response = await fetch(API_CONFIG.ENDPOINTS.OPTIONS.ALL, {
+                headers: getHeaders()
+            });
+            const responseData = await handleResponse(response);
+            if (responseData.token) {
+              localStorage.setItem('token', responseData.token);
+            }
+            return responseData;
+        } catch (error) {
+            console.error('Get all options failed:', error);
+            throw new Error(error.message || 'Ошибка получения опций');
+    }
+},
     async exportData({ type, startDate, endDate, format }) {
         try {
             const queryParams = new URLSearchParams();

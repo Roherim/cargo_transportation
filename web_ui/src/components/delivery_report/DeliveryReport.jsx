@@ -48,6 +48,7 @@ const DeliveryReport = () => {
         const loadFilterOptions = async () => {
             try {
                 const options = await api.getAllOptions();
+                console.log(options);
                 setFilterOptions({
                     statuses: options.statuses,
                     cargoTypes: options.cargo_types,
@@ -59,6 +60,8 @@ const DeliveryReport = () => {
             }
         };
         loadFilterOptions();
+      
+
     }, []);
 
     // Загрузка отчета

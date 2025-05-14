@@ -1,11 +1,12 @@
 import React from 'react';
 import { AppBar, Toolbar, Button, Box, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useApplication } from '../../context/ApplicationContext';
 
 const Navigation = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
+    const { resetForm } = useApplication();
     const isActive = (path) => location.pathname === path;
 
     return (
@@ -26,7 +27,7 @@ const Navigation = () => {
                     </Button>
                     <Button
                         color="inherit"
-                        onClick={() => navigate('/new_delivery')}
+                        onClick={() => {navigate('/new_delivery'); resetForm()}}
                         sx={{
                             backgroundColor: isActive('/new_delivery') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
                         }}

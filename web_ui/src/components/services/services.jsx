@@ -30,7 +30,7 @@ import { api } from '../../services/api';
 
 const Services = () => {
     const { applicationData, updateFormData } = useApplication();
-    const [selectedServices, setSelectedServices] = useState([]);
+    const [selectedServices, setSelectedServices] = useState(applicationData.servicesData?.services||[]);
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

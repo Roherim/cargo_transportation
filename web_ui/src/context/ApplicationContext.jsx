@@ -173,10 +173,13 @@ export const ApplicationProvider = ({ children }) => {
             if (!applicationData.modelData?.number) {
                 throw new Error('Введите номер транспорта');
             }
-            if (!applicationData.addressData?.fromAddress) {
+            if (!applicationData.addressData?.pickup_address) {
                 throw new Error('Введите адрес отправления');
             }
-            if (!applicationData.addressData?.toAddress) {
+            if (!applicationData.addressData?.delivery_address) {
+                throw new Error('Введите адрес доставки');
+            }
+            if (!applicationData.addressData?.distance) {
                 throw new Error('Введите адрес доставки');
             }
             if (!applicationData.packagingData?.packaging) {
@@ -185,33 +188,37 @@ export const ApplicationProvider = ({ children }) => {
             if (!applicationData.servicesData?.services?.length) {
                 throw new Error('Выберите хотя бы одну услугу');
             }
-            if (!applicationData.dateTimeData?.departureDate) {
+            if (!applicationData.datetimeData?.departure_date) {
                 throw new Error('Выберите дату отправления');
             }
-            if (!applicationData.dateTimeData?.departureTime) {
+            if (!applicationData.datetimeData?.departure_time) {
                 throw new Error('Выберите время отправления');
             }
-            if (!applicationData.dateTimeData?.arrivalTime) {
+            if (!applicationData.datetimeData?.arrival_date) {
+                throw new Error('Выберите дату отправления');
+            }
+            if (!applicationData.datetimeData?.arrival_time) {
                 throw new Error('Выберите время прибытия');
             }
-            if (!applicationData.dateTimeData?.travelTime) {
+            if (!applicationData.datetimeData?.travel_time) {
                 throw new Error('Введите время в пути');
             }
 
             // Формируем данные для отправки
             const deliveryData = {
-                transport_model: applicationData.modelData.model,
+                transport_model: Number(applicationData.modelData.model),
                 transport_number: applicationData.modelData.number,
-                pickup_address: applicationData.addressData.fromAddress,
-                delivery_address: applicationData.addressData.toAddress,
-                distance: applicationData.addressData.distance,
-                packaging_type: applicationData.packagingData.packaging,
-                services: applicationData.servicesData.services,
-                departure_date: applicationData.dateTimeData.departureDate,
-                departure_time: applicationData.dateTimeData.departureTime,
-                arrival_date: applicationData.dateTimeData.arrivalDate,
-                arrival_time: applicationData.dateTimeData.arrivalTime,
-                travel_time: applicationData.dateTimeData.travelTime
+                pickup_address: applicationData.addressData.pickup_address,
+                delivery_address: applicationData.addressData.delivery_address,
+                distance: Number(applicationData.addressData.distance),
+                packaging_type: Number(applicationData.packagingData.packaging),
+                cargo_type: Number(applicationData.cargoData.cargo_type),
+                services: applicationData.servicesData.services.map(Number),
+                departure_date: applicationData.datetimeData.departure_date,
+                departure_time: applicationData.datetimeData.departure_time,
+                arrival_date: applicationData.datetimeData.arrival_date,
+                arrival_time: applicationData.datetimeData.arrival_time,
+                travel_time: Number(applicationData.datetimeData.travel_time)
             };
 
             console.log('Current application data:', applicationData);
@@ -254,7 +261,8 @@ export const ApplicationProvider = ({ children }) => {
             notification,
             setNotification,
             setLoading,
-            setError
+            setError,
+            resetForm
         }}>
             {children}
         </ApplicationContext.Provider>

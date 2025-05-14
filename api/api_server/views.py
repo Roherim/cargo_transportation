@@ -95,6 +95,7 @@ def delivery(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@token_required
 def get_all_options(request):
     """Получение всех опций для форм"""
     try:
@@ -142,6 +143,7 @@ def get_all_options(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@token_required
 def delivery_list(request):
     try:
         # Получаем параметры фильтрации
@@ -223,6 +225,7 @@ def delivery_list(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@token_required
 def get_filter_options(request):
     """Получение опций для фильтров"""
     try:
@@ -405,7 +408,9 @@ def get_delivery(request):
         print("Unexpected error in get_delivery:", str(e))
         return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=400)
 
-@require_http_methods(["PUT"])
+@csrf_exempt
+@require_http_methods(["PUT", "OPTIONS"])
+@token_required
 def update_delivery(request, delivery_id):
     """Обновление доставки"""
     try:
@@ -415,7 +420,7 @@ def update_delivery(request, delivery_id):
         delivery = Delivery.objects.get(id=delivery_id)
         print("Found delivery:", delivery)  # Логируем найденную доставку
         
-        # Обновляем поля с новыми названиями
+        # Обновляем поля с проверкой
         if 'transport_model' in data:
             delivery.transport_model_id = data['transport_model']
         if 'transport_number' in data:
@@ -427,17 +432,41 @@ def update_delivery(request, delivery_id):
         if 'packaging_type' in data:
             delivery.packaging_type_id = data['packaging_type']
         if 'services' in data:
-            delivery.services.set(data['services'])
+            if isinstance(data['services'], list):
+                delivery.services.set(data['services'])
+            else:
+                return JsonResponse({'error': 'Services must be a list'}, status=400)
         if 'departure_date' in data:
             delivery.departure_date = data['departure_date']
         if 'departure_time' in data:
-            delivery.departure_time = data['departure_time']
+            # Проверяем, что время в формате HH:MM
+            try:
+                time_str = data['departure_time']
+                if time_str:
+                    hours, minutes = map(int, time_str.split(':'))
+                    if not (0 <= hours <= 23 and 0 <= minutes <= 59):
+                        raise ValueError
+                delivery.departure_time = time_str
+            except (ValueError, TypeError):
+                return JsonResponse({'error': 'Invalid departure_time format (HH:MM expected)'}, status=400)
         if 'arrival_date' in data:
             delivery.arrival_date = data['arrival_date']
         if 'arrival_time' in data:
-            delivery.arrival_time = data['arrival_time']
+            # Проверяем, что время в формате HH:MM
+            try:
+                time_str = data['arrival_time']
+                if time_str:
+                    hours, minutes = map(int, time_str.split(':'))
+                    if not (0 <= hours <= 23 and 0 <= minutes <= 59):
+                        raise ValueError
+                delivery.arrival_time = time_str
+            except (ValueError, TypeError):
+                return JsonResponse({'error': 'Invalid arrival_time format (HH:MM expected)'}, status=400)
         if 'travel_time' in data:
-            delivery.travel_time = data['travel_time']
+            try:
+                delivery.travel_time = float(data['travel_time'])
+            except (ValueError, TypeError):
+                return JsonResponse({'error': 'Invalid travel_time (number expected)'}, status=400)
         if 'notes' in data:
             delivery.notes = data['notes']
             
@@ -473,6 +502,7 @@ def update_delivery(request, delivery_id):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@token_required
 def get_delivery_report(request):
     """Получение отчета по доставкам"""
     try:
@@ -507,41 +537,37 @@ def get_delivery_report(request):
         # Сериализуем данные
         data = {
             'deliveries': [{
-                'id': delivery.id,
-                'number': delivery.number,
-                'date': delivery.date.strftime('%Y-%m-%d'),
-                'delivery_time': delivery.delivery_time.strftime('%H:%M') if delivery.delivery_time else None,
-                'arrival_time': delivery.arrival_time.strftime('%H:%M') if delivery.arrival_time else None,
-                'transport_model': {
-                    'id': delivery.transport_model.id,
-                    'name': delivery.transport_model.name
-                },
-                'transport_number': delivery.transport_number,
-                'cargo_type': {
-                    'id': delivery.cargo_type.id,
-                    'name': delivery.cargo_type.name
-                },
-                'packaging_type': {
-                    'id': delivery.packaging_type.id,
-                    'name': delivery.packaging_type.name
-                },
-                'services': [{
-                    'id': service.id,
-                    'name': service.name,
-                    'price': float(service.price)
-                } for service in delivery.services.all()],
-                'status': {
-                    'id': delivery.status.id,
-                    'name': delivery.status.name
-                },
-                'distance': float(delivery.distance),
-                'travel_time': float(delivery.travel_time),
-                'delivery_address': delivery.delivery_address,
-                'pickup_address': delivery.pickup_address,
-                'notes': delivery.notes,
-                'created_at': delivery.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'updated_at': delivery.updated_at.strftime('%Y-%m-%d %H:%M:%S')
-            } for delivery in deliveries],
+            'id': delivery.id,
+            'number': delivery.number,
+            'date': delivery.departure_date.strftime('%Y-%m-%d'),  # Соответствует departure_date
+            'time': delivery.departure_time.strftime('%H:%M') if delivery.departure_time else '',  # Соответствует departure_time
+            'arrival_date': delivery.arrival_date.strftime('%Y-%m-%d'),  # Добавлено для полноты
+            'arrival_time': delivery.arrival_time.strftime('%H:%M') if delivery.arrival_time else '',  # Второй time, скорее всего, arrival_time
+            'transport_model': {
+                'id': delivery.transport_model.id,
+                'name': delivery.transport_model.name
+            },
+            'transport_number': delivery.transport_number,
+            'cargo_type': {
+                'id': delivery.cargo_type.id,
+                'name': delivery.cargo_type.name
+            },
+            'status': {
+                'id': delivery.status.id,
+                'name': delivery.status.name
+            },
+            'distance': float(delivery.travel_time),  # Соответствует travel_time
+            'delivery_address': delivery.delivery_address,
+            'pickup_address': delivery.pickup_address,
+            'notes': delivery.notes or '',
+            # Дополнительные поля из модели Delivery
+            'packaging_type': {
+                'id': delivery.packaging_type.id,
+                'name': delivery.packaging_type.name
+            },
+            'services': [service.id for service in delivery.services.all()],
+            'travel_time': float(delivery.travel_time)  # Для совместимости с другими частями
+        } for delivery in deliveries],
             'statistics': [{'name': status, 'count': count} 
                          for status, count in status_stats.items()]
         }
@@ -550,8 +576,39 @@ def get_delivery_report(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
+
+@csrf_exempt
+@require_http_methods(["DELETE", "OPTIONS"])
+@token_required
+def delete_delivery(request, delivery_id):
+    """Удаление доставки по ID"""
+    try:
+        # Ищем доставку по ID
+        delivery = Delivery.objects.get(id=delivery_id)
+        print(f"Found delivery to delete: {delivery}")  # Логируем найденную доставку
+
+        # Удаляем доставку
+        delivery.delete()
+        print(f"Delivery {delivery_id} deleted successfully")  # Логируем успешное удаление
+
+        # Возвращаем статус 204 (No Content) для успешного удаления
+        return HttpResponse(status=204)
+
+    except Delivery.DoesNotExist:
+        print(f"Delivery not found: {delivery_id}")  # Логируем отсутствие доставки
+        return JsonResponse({
+            'error': 'Delivery not found'
+        }, status=404)
+    except Exception as e:
+        print(f"Unexpected error during deletion: {str(e)}")  # Логируем неожиданную ошибку
+        return JsonResponse({
+            'error': f'Unexpected error: {str(e)}'
+        }, status=400)
+
+    
 @csrf_exempt
 @require_http_methods(["GET"])
+@token_required
 def export_data(request):
     """Экспорт данных"""
     try:
