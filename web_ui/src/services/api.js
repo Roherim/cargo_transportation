@@ -1,14 +1,14 @@
 import { API_CONFIG } from '../config/api.config';
 import { useNavigate } from 'react-router-dom';
 // Вспомогательные функции
-navigate = useNavigate();
+
 const handleResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         if (response.status === 401) {
             localStorage.setItem('token', null);
             localStorage.setItem('link','/login')
-            navigate('/login')
+            window.location.href='/login'
 
         }
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
