@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { api } from '../../services/api';
+import { useApplication } from '../../context/ApplicationContext';
 
 const DeliveryList = () => {
     const navigate = useNavigate();
@@ -44,7 +45,7 @@ const DeliveryList = () => {
         transportModel: '',
         search: ''
     });
-
+    const {resetForm}= useApplication();
     // Загрузка опций для фильтров
     // useEffect(() => {
     //     const fetchFilterOptions = async () => {
@@ -200,7 +201,7 @@ const DeliveryList = () => {
                     <Button
                         variant="contained"
                         startIcon={<AddIcon />}
-                        onClick={() => navigate('/new_delivery')}
+                        onClick={() => {navigate('/new_delivery'); resetForm()}}
                         sx={{
                             backgroundColor: '#1a237e',
                             '&:hover': {

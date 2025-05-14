@@ -17,6 +17,7 @@ const Auth = ({link, setLink}) => {
     const [user, setUser] = useState(null);
       const [token, setToken] = useState(localStorage.getItem('token'));
       const [loading, setLoading] = useState(true);
+
     const login = async (username, password) => {
         try {
           console.log('Attempting login with:', { username, password });
