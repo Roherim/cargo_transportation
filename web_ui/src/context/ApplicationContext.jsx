@@ -86,7 +86,7 @@ export const ApplicationProvider = ({ children }) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-
+    
         try {
             // Проверяем наличие всех необходимых данных
             if (!applicationData.modelData?.model) {
@@ -125,7 +125,7 @@ export const ApplicationProvider = ({ children }) => {
             if (!applicationData.datetimeData?.travel_time) {
                 throw new Error('Введите время в пути');
             }
-
+    
             const deliveryData = {
                 transport_model: Number(applicationData.modelData.model),
                 transport_number: applicationData.modelData.number,
@@ -141,15 +141,18 @@ export const ApplicationProvider = ({ children }) => {
                 arrival_time: applicationData.datetimeData.arrival_time,
                 travel_time: Number(applicationData.datetimeData.travel_time)
             };
-
+    
+            const file = applicationData.addressData?.file || null;
+    
             console.log('Sending delivery data:', deliveryData);
-            const response = await api.createDelivery(deliveryData);
+            console.log('File to upload:', file ? file.name : 'No file');
+            const response = await api.createDelivery(deliveryData, file);
             console.log('Server response:', response);
-
+    
             if (response.error) {
                 throw new Error(response.error);
             }
-
+    
             // Сбрасываем форму после успешного создания
             resetForm();
             navigate('/deliveries');
@@ -165,7 +168,7 @@ export const ApplicationProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-
+    
             // Проверяем наличие всех необходимых данных
             if (!applicationData.modelData?.model) {
                 throw new Error('Выберите модель транспорта');
@@ -180,7 +183,7 @@ export const ApplicationProvider = ({ children }) => {
                 throw new Error('Введите адрес доставки');
             }
             if (!applicationData.addressData?.distance) {
-                throw new Error('Введите адрес доставки');
+                throw new Error('Введите расстояние'); // Исправляем сообщение
             }
             if (!applicationData.packagingData?.packaging) {
                 throw new Error('Выберите тип упаковки');
@@ -195,7 +198,7 @@ export const ApplicationProvider = ({ children }) => {
                 throw new Error('Выберите время отправления');
             }
             if (!applicationData.datetimeData?.arrival_date) {
-                throw new Error('Выберите дату отправления');
+                throw new Error('Выберите дату прибытия'); // Исправляем сообщение
             }
             if (!applicationData.datetimeData?.arrival_time) {
                 throw new Error('Выберите время прибытия');
@@ -203,7 +206,7 @@ export const ApplicationProvider = ({ children }) => {
             if (!applicationData.datetimeData?.travel_time) {
                 throw new Error('Введите время в пути');
             }
-
+    
             // Формируем данные для отправки
             const deliveryData = {
                 transport_model: Number(applicationData.modelData.model),
@@ -220,21 +223,24 @@ export const ApplicationProvider = ({ children }) => {
                 arrival_time: applicationData.datetimeData.arrival_time,
                 travel_time: Number(applicationData.datetimeData.travel_time)
             };
-
+    
+            const file = applicationData.addressData?.file || null;
+    
             console.log('Current application data:', applicationData);
             console.log('Formatted delivery data for update:', deliveryData);
-
+            console.log('File to upload:', file ? file.name : 'No file');
+    
             // Отправляем данные на сервер
-            const response = await api.updateDelivery(deliveryId, deliveryData);
+            const response = await api.updateDelivery(deliveryId, deliveryData, file);
             console.log('Server response:', response);
-
+    
             // Показываем уведомление об успехе
             setNotification({
                 open: true,
                 message: 'Доставка успешно обновлена',
                 severity: 'success'
             });
-
+    
             return true;
         } catch (error) {
             console.error('Error updating delivery:', error);

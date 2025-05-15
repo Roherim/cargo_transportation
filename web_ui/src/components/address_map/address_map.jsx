@@ -12,6 +12,14 @@ const AddressMap = () => {
         });
     };
 
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        updateFormData('addressData', {
+            ...applicationData.addressData,
+            file: file || null // Сохраняем файл или null, если файл не выбран
+        });
+    };
+
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Typography 
@@ -65,10 +73,28 @@ const AddressMap = () => {
                             />
                         </FormControl>
                     </Grid>
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                Загрузить файл (PDF)
+                            </Typography>
+                            <input
+                                type="file"
+                                accept="application/pdf"
+                                onChange={handleFileChange}
+                                style={{ marginTop: '8px' }}
+                            />
+                            {applicationData.addressData?.file && (
+                                <Typography variant="body2" sx={{ mt: 1, color: 'green' }}>
+                                    Файл выбран: {applicationData.addressData.file.name}
+                                </Typography>
+                            )}
+                        </FormControl>
+                    </Grid>
                 </Grid>
             </Box>
         </Container>
     );
 };
 
-export default AddressMap; 
+export default AddressMap;

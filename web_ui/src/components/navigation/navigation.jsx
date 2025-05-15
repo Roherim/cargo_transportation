@@ -2,6 +2,7 @@ import React from 'react';
 import { AppBar, Toolbar, Button, Box, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApplication } from '../../context/ApplicationContext';
+import { api } from '../../services/api';
 
 const Navigation = () => {
     const navigate = useNavigate();
@@ -42,6 +43,15 @@ const Navigation = () => {
                         }}
                     >
                         Отчёты
+                    </Button>
+                    <Button
+                        color="inherit"
+                        onClick={() => {api.logout(); navigate('/login')}}
+                        sx={{
+                            backgroundColor: isActive('/report') ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                        }}
+                    >
+                        Выход
                     </Button>
                 </Box>
             </Toolbar>

@@ -111,7 +111,7 @@ const EditDelivery = () => {
             console.log('Starting save process...');
             console.log('Current application data:', applicationData);
             setSaving(true);
-
+    
             // Проверяем наличие всех необходимых данных
             if (!applicationData.modelData?.model) {
                 throw new Error('Выберите модель транспорта');
@@ -126,7 +126,7 @@ const EditDelivery = () => {
                 throw new Error('Введите адрес доставки');
             }
             if (!applicationData.addressData?.distance) {
-                throw new Error('Введите адрес доставки');
+                throw new Error('Введите расстояние');
             }
             if (!applicationData.packagingData?.packaging) {
                 throw new Error('Выберите тип упаковки');
@@ -141,7 +141,7 @@ const EditDelivery = () => {
                 throw new Error('Выберите время отправления');
             }
             if (!applicationData.datetimeData?.arrival_date) {
-                throw new Error('Выберите дату отправления');
+                throw new Error('Выберите дату прибытия');
             }
             if (!applicationData.datetimeData?.arrival_time) {
                 throw new Error('Выберите время прибытия');
@@ -149,10 +149,11 @@ const EditDelivery = () => {
             if (!applicationData.datetimeData?.travel_time) {
                 throw new Error('Введите время в пути');
             }
-
+    
             const success = await handleUpdate(id);
             console.log('Save result:', success);
             if (success) {
+                resetForm(); // Переносим resetForm сюда
                 navigate('/deliveries');
             }
         } catch (error) {
@@ -161,7 +162,6 @@ const EditDelivery = () => {
         } finally {
             setSaving(false);
         }
-        resetForm()
     };
 
     const handleDelete = async () => {

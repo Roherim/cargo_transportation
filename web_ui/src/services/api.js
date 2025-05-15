@@ -5,16 +5,20 @@ import { useNavigate } from 'react-router-dom';
 const handleResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log('Response error:', { status: response.status, errorData });
         if (response.status === 401) {
             localStorage.setItem('token', null);
-            localStorage.setItem('link','/login')
-            window.location.href='/login'
-
+            localStorage.setItem('link', '/login');
+            window.location.href = '/login';
         }
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-        
     }
-    return response.json();
+    const responseData = await response.json();
+    console.log('Response data:', responseData);
+    if (responseData.token) {
+        localStorage.setItem('token', responseData.token);
+    }
+    return responseData;
 };
 
 const getHeaders = (includeAuth = true) => {
@@ -146,21 +150,42 @@ const api = {
     },
 
     // Доставки
-    async createDelivery(data) {
+    async createDelivery(data, file = null) {
         try {
+            // Создаем FormData для отправки данных и файла
+            const formData = new FormData();
+            formData.append('data', JSON.stringify(data));
+            if (file) {
+                formData.append('file', file);
+                console.log('Файл добавлен в FormData:', file.name, file.type, file.size);
+            } else {
+                console.log('Файл не предоставлен для загрузки');
+            }
+    
+            // Получаем заголовки и удаляем Content-Type, так как FormData сам его устанавливает
+            const headers = getHeaders();
+            delete headers['Content-Type'];
+    
+            // Логируем данные перед отправкой для отладки
+            console.log('Отправка запроса на создание доставки с FormData:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}:`, value instanceof File ? value.name : value);
+            }
+    
+            // Отправляем POST-запрос
             const response = await fetch(API_CONFIG.ENDPOINTS.DELIVERY.NEW, {
                 method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify(data)
+                headers,
+                body: formData,
             });
+    
+            // Обрабатываем ответ
             const responseData = await handleResponse(response);
-            if (responseData.token) {
-              localStorage.setItem('token', responseData.token);
-            }
+            console.log('Ответ сервера:', responseData);
             return responseData;
         } catch (error) {
-            console.error('Create delivery failed:', error);
-            throw new Error(error.message || 'Ошибка создания доставки');
+            console.error('Ошибка при создании доставки:', error);
+            throw new Error(error.message || 'Не удалось создать доставку');
         }
     },
 
@@ -182,21 +207,42 @@ const api = {
         }
     },
 
-    async updateDelivery(id, data) {
+    async updateDelivery(id, data, file = null) {
         try {
-            const response = await fetch(API_CONFIG.ENDPOINTS.DELIVERY.UPDATE(id), {
-                method: 'PUT',
-                headers: getHeaders(),
-                body: JSON.stringify(data)
-            });
-            const responseData = await handleResponse(response);
-            if (responseData.token) {
-              localStorage.setItem('token', responseData.token);
+            // Создаем FormData для отправки данных и файла
+            const formData = new FormData();
+            formData.append('data', JSON.stringify(data));
+            if (file) {
+                formData.append('file', file);
+                console.log('Файл добавлен в FormData:', file.name, file.type, file.size);
+            } else {
+                console.log('Файл не предоставлен для загрузки');
             }
+    
+            // Получаем заголовки и удаляем Content-Type
+            const headers = getHeaders();
+            delete headers['Content-Type'];
+    
+            // Логируем данные перед отправкой
+            console.log('Отправка запроса на обновление доставки с FormData:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}:`, value instanceof File ? value.name : value);
+            }
+    
+            // Отправляем PUT-запрос
+            const response = await fetch(API_CONFIG.ENDPOINTS.DELIVERY.UPDATE(id), {
+                method: 'POST', 
+                headers,
+                body: formData,
+            });
+    
+            // Обрабатываем ответ
+            const responseData = await handleResponse(response);
+            console.log('Ответ сервера:', responseData);
             return responseData;
         } catch (error) {
-            console.error('Update delivery failed:', error);
-            throw new Error(error.message || 'Ошибка обновления доставки');
+            console.error('Ошибка при обновлении доставки:', error);
+            throw new Error(error.message || 'Не удалось обновить доставку');
         }
     },
 

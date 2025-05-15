@@ -17,15 +17,15 @@ urlpatterns = [
     path('auth/register/', views.register_view, name='register'),
     path('auth/logout/', views.logout_view, name='logout'),
     path('user/', views.get_user_info, name='user-info'),
-    path('delivery/get/', views.get_delivery, name='get_delivery'),  # Исправили точку на запятую
-    path('delivery/<int:delivery_id>/register/', views.register_delivery, name='register_delivery'),  # Исправили точку на запятую
+    path('delivery/get/', views.get_delivery, name='get_delivery'),
+    path('delivery/<int:delivery_id>/register/', views.register_delivery, name='register_delivery'),
     # Эндпоинты для опций
     path('options/', views.get_all_options, name='get_all_options'),
     
     # Эндпоинты для доставок
     path('delivery/list/', views.delivery_list, name='delivery_list'),
     path('delivery/new/', views.new_delivery, name='new_delivery'),
-    
+    path('delivery/<int:delivery_id>/update/', views.update_delivery, name='update_delivery'),  # Новый маршрут
     path('delivery/<int:delivery_id>/delete/', views.delete_delivery, name='delete_delivery'),
     
     # Эндпоинты для фильтров

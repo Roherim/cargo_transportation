@@ -116,6 +116,8 @@ class Delivery(models.Model):
     arrival_time = models.TimeField(verbose_name="Время прибытия", default='12:00')
     travel_time = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Время в пути (часы)", default=0)
     notes = models.TextField(blank=True, verbose_name="Примечания")
+    file_path = models.CharField(max_length=255, blank=True, null=True, verbose_name="Путь к файлу", default=0)
+    distance = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Расстояние", default=0)
 
     class Meta:
         verbose_name = "Доставка"
