@@ -38,7 +38,7 @@ console.log(applicationData.datetimeData)
                                 value={applicationData.datetimeData?.departure_date || ''}
                                 onChange={handleDateTimeChange('departure_date')}
                                 InputLabelProps={{ shrink: true }}
-                                error={!applicationData.datetimeData?.departure_date}
+                            
                                 helperText={!applicationData.datetimeData?.departure_date ? "Выберите дату отправления" : ""}
                             />
                         </FormControl>
@@ -51,7 +51,7 @@ console.log(applicationData.datetimeData)
                                 value={applicationData.datetimeData?.departure_time || ''}
                                 onChange={handleDateTimeChange('departure_time')}
                                 InputLabelProps={{ shrink: true }}
-                                error={!applicationData.datetimeData?.departure_time}
+                               
                                 helperText={!applicationData.datetimeData?.departure_time ? "Выберите время отправления" : ""}
                             />
                         </FormControl>
@@ -64,7 +64,7 @@ console.log(applicationData.datetimeData)
                                 value={applicationData.datetimeData?.arrival_date || ''}
                                 onChange={handleDateTimeChange('arrival_date')}
                                 InputLabelProps={{ shrink: true }}
-                                error={!applicationData.datetimeData?.arrival_date}
+                           
                                 helperText={!applicationData.datetimeData?.arrival_date ? "Выберите дату прибытия" : ""}
                             />
                         </FormControl>
@@ -77,7 +77,7 @@ console.log(applicationData.datetimeData)
                                 value={applicationData.datetimeData?.arrival_time || ''}
                                 onChange={handleDateTimeChange('arrival_time')}
                                 InputLabelProps={{ shrink: true }}
-                                error={!applicationData.datetimeData?.arrival_time}
+                              
                                 helperText={!applicationData.datetimeData?.arrival_time ? "Выберите время прибытия" : ""}
                             />
                         </FormControl>
@@ -90,7 +90,7 @@ console.log(applicationData.datetimeData)
                                 value={applicationData.datetimeData?.travel_time || ''}
                                 onChange={handleDateTimeChange('travel_time')}
                                 InputProps={{ inputProps: { min: 0, step: 0.5 } }}
-                                error={!applicationData.datetimeData?.travel_time}
+                            
                                 helperText={!applicationData.datetimeData?.travel_time ? "Введите время в пути" : ""}
                             />
                         </FormControl>

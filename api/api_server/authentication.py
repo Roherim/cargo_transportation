@@ -17,22 +17,22 @@ def login_user(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             # Создаем или получаем токен
-            print(f"Creating token for user: {user.username}")
+          
             try:
-                # Удаляем старый токен, если он существует
-                CustomToken.objects.filter(user=user).delete()
-                
+              
+                token = CustomToken.objects.filter(user=user)
+                if token and token.exists():
                 # Создаем новый токен
-                token = CustomToken.objects.create(user=user)
-                token.save()  # Явное сохранение
-                print(f"Created new token for user {user.username}: {token.key}")
+                    token = CustomToken.objects.create(user=user)
+                    token.save()  # Явное сохранение
+                    
                 
                 # Проверяем сохранение в базе данных
                 try:
                     db_token = CustomToken.objects.get(key=token.key)
-                    print(f"Token successfully saved in database: key={db_token.key}, user={db_token.user.username}")
+                   
                 except CustomToken.DoesNotExist:
-                    print(f"ERROR: Token {token.key} not found in database after creation")
+                   
                     return JsonResponse({'error': 'Token creation failed'}, status=500)
                 
                 return JsonResponse({

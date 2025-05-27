@@ -44,7 +44,7 @@ const AddressMap = () => {
                                 label="Адрес отправления"
                                 value={applicationData.addressData?.pickup_address || ''}
                                 onChange={handleAddressChange('pickup_address')}
-                                error={!applicationData.addressData?.pickup_address}
+                             
                                 helperText={!applicationData.addressData?.pickup_address ? "Введите адрес отправления" : ""}
                             />
                         </FormControl>
@@ -55,7 +55,7 @@ const AddressMap = () => {
                                 label="Адрес доставки"
                                 value={applicationData.addressData?.delivery_address || ''}
                                 onChange={handleAddressChange('delivery_address')}
-                                error={!applicationData.addressData?.delivery_address}
+                            
                                 helperText={!applicationData.addressData?.delivery_address ? "Введите адрес доставки" : ""}
                             />
                         </FormControl>
@@ -68,7 +68,7 @@ const AddressMap = () => {
                                 value={applicationData.addressData?.distance || ''}
                                 onChange={handleAddressChange('distance')}
                                 InputProps={{ inputProps: { min: 0, step: 0.1 } }}
-                                error={!applicationData.addressData?.distance}
+                               
                                 helperText={!applicationData.addressData?.distance ? "Введите расстояние" : ""}
                             />
                         </FormControl>

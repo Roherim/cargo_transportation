@@ -726,9 +726,12 @@ def login_view(request):
     try:
         user = authenticate(username=username, password=password)
         if user is not None:
-            # Создаем токен
-            token = CustomToken.objects.create(user=user)
-            print(f"Created new token for user {username}")
+
+            token = CustomToken.objects.filter(user=user).first()
+            if token is None:
+                # Создаем новый токен
+                token = CustomToken.objects.create(user=user)
+                token.save()  # Явное сохранение
             
             return Response({
                 'token': token.key,

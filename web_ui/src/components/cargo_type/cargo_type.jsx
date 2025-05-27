@@ -97,7 +97,7 @@ const CargoType = () => {
                         value={cargoType}
                         onChange={handleCargoTypeChange}
                         fullWidth
-                        error={!cargoType}
+                      
                         helperText={!cargoType ? "Выберите тип груза" : ""}
                     >
                         {cargoTypes.map((type) => (

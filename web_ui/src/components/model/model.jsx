@@ -111,7 +111,7 @@ const Model = () => {
                         label="Модель транспорта"
                         value={model}
                         onChange={handleModelChange}
-                        error={!model}
+                        
                         helperText={!model ? "Выберите модель транспорта" : ""}
                     >
                         {models.map((model) => (
@@ -127,7 +127,7 @@ const Model = () => {
                         label="Номер транспорта"
                         value={number}
                         onChange={handleNumberChange}
-                        error={!number}
+                   
                         helperText={!number ? "Введите номер транспорта" : ""}
                     />
                 </FormControl>

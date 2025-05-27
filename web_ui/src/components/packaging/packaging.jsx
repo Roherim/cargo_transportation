@@ -97,7 +97,7 @@ const Packaging = () => {
                         value={packaging}
                         onChange={handlePackagingChange}
                         fullWidth
-                        error={!packaging}
+                    
                         helperText={!packaging ? "Выберите тип упаковки" : ""}
                     >
                         {packagingTypes.map((type) => (
